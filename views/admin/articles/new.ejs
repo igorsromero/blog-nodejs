@@ -9,7 +9,7 @@ include("../../partials/navbar.ejs") %>
         <h2>Novo artigo</h2>
       </div>
       <div class="card-body">
-        <form method="POST" action="/categories/save">
+        <form method="POST" action="/articles/save">
           <input
             class="form-control"
             type="text"
@@ -23,6 +23,13 @@ include("../../partials/navbar.ejs") %>
             name="body"
             id="article"
           ></textarea>
+          <br />
+          <label>Categoria</label>
+          <select name="category" class="form-control">
+            <% categories.forEach((category)=>{ %>
+            <option value="<%= category.id %>"><%= category.title %></option>
+            <% }) %>
+          </select>
           <br />
           <button class="btn btn-success">Cadastrar</button>
         </form>
