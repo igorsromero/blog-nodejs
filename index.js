@@ -1,17 +1,28 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const session = require("express-session");
 const connection = require("./database/database");
 
 const categoriesController = require("./categories/CategoriesController");
 const articlesController = require("./articles/ArticlesController");
+const usersController = require("./users/UsersController");
 
 // IMPORT DOS MODELS
 const Article = require("./articles/Article");
 const Category = require("./categories/Category");
+const User = require("./users/User")
 
 //View engine
 app.set("view engine", "ejs");
+
+
+//config sessions
+//REDIS PARA APLICAÇÕES DE MÉDIA E GRANDE ESCALA
+
+app.use(session({
+  secret: "apsokaspoask", cookie: { maxAge: 3000000000 }
+}));
 
 //Static
 app.use(express.static("public"));
@@ -32,6 +43,22 @@ connection
 
 app.use("/", categoriesController);
 app.use("/", articlesController);
+app.use("/", usersController);
+
+/* TESTE DE SESSÕES
+app.get("/session", (req, res) => {
+  req.session.treinamento = "Estudo Node.js";
+  req.session.email = "igor@gmail.com"
+  res.send("Sessão iniciada.");
+});
+
+app.get("/leitura", (req, res) => {
+  res.json({
+    treinamento: req.session.treinamento,
+    email: req.session.email
+  })
+});
+*/
 
 app.get("/", (req, res) => {
   Article.findAll({
@@ -44,22 +71,22 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/:slug",(req, res) => {
+app.get("/:slug", (req, res) => {
   var slug = req.params.slug;
   Article.findOne({
-      where: {
-          slug: slug
-      }
+    where: {
+      slug: slug
+    }
   }).then(article => {
-      if(article != undefined){
-          Category.findAll().then(categories => {
-              res.render("article", {article: article, categories: categories});
-          });
-      }else{
-          res.redirect("/");
-      }
-  }).catch( err => {
+    if (article != undefined) {
+      Category.findAll().then(categories => {
+        res.render("article", { article: article, categories: categories });
+      });
+    } else {
       res.redirect("/");
+    }
+  }).catch(err => {
+    res.redirect("/");
   });
 })
 
